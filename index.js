@@ -37,6 +37,13 @@ async function run() {
       const result = await bookCollection.find().toArray();
       res.send(result)
     })
+
+    app.post('/allBooks', async (req, res) => {
+      const book = req.body;
+      const result = await bookCollection.insertOne(book);
+      res.send(result)
+    })
+
     app.get('/books/:category', async (req, res) => {
       const { category } = req.params;
       const result = await bookCollection.find({ category: category }).toArray();
@@ -59,18 +66,17 @@ async function run() {
       res.json(book);
     });
 
-
-    app.get("/borrowBooks" , async(req , res)=>{
+    app.get("/borrowBooks", async (req, res) => {
       let query = {};
-      if(req?.query?.email){
-        query = { email: req?.query?.email}
+      if (req?.query?.email) {
+        query = { email: req?.query?.email }
       }
       const result = await borrowBookCollection.find(query).toArray();
       res.send(result)
     })
 
-    app.post('/borrowBooks/:id' , async(req , res)=>{
-      const book = req.body ;
+    app.post('/borrowBooks/:id', async (req, res) => {
+      const book = req.body;
       const result = await borrowBookCollection.insertOne(book)
       res.send(result)
     })
