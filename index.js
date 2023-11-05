@@ -27,6 +27,7 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     const categoryCollection = client.db("bookDB").collection("categories");
     const bookCollection = client.db("bookDB").collection("books");
+    const borrowBookCollection = client.db("bookDB").collection("borrowBooks");
     await client.connect();
     app.get('/categories', async (req, res) => {
       const result = await categoryCollection.find().toArray();
@@ -57,6 +58,22 @@ async function run() {
       );
       res.json(book);
     });
+
+
+    app.get("/borrowBooks" , async(req , res)=>{
+      let query = {};
+      if(req?.query?.email){
+        query = { email: req?.query?.email}
+      }
+      const result = await borrowBookCollection.find(query).toArray();
+      res.send(result)
+    })
+
+    app.post('/borrowBooks/:id' , async(req , res)=>{
+      const book = req.body ;
+      const result = await borrowBookCollection.insertOne(book)
+      res.send(result)
+    })
 
 
 
