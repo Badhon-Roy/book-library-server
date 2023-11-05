@@ -44,6 +44,20 @@ async function run() {
       res.send(result)
     })
 
+    app.put('/allBooks/:id', async (req, res) => {
+      const id = req.params.id;
+      const book = req.body;
+      const filter = { _id: new ObjectId(id) }
+      const options = { upsert: true };
+      const updateBook = {
+        $set: {
+          ...book
+        },
+      };
+      const result = await bookCollection.updateOne(filter, updateBook, options);
+      res.send(result)
+    })
+
     app.get('/books/:category', async (req, res) => {
       const { category } = req.params;
       const result = await bookCollection.find({ category: category }).toArray();
