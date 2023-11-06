@@ -44,20 +44,6 @@ async function run() {
       res.send(result)
     })
 
-    app.put('/allBooks/:id', async (req, res) => {
-      const id = req.params.id;
-      const book = req.body;
-      const filter = { _id: new ObjectId(id) }
-      const options = { upsert: true };
-      const updateBook = {
-        $set: {
-          ...book
-        },
-      };
-      const result = await bookCollection.updateOne(filter, updateBook, options);
-      res.send(result)
-    })
-
     app.get('/books/:category', async (req, res) => {
       const { category } = req.params;
       const result = await bookCollection.find({ category: category }).toArray();
@@ -69,16 +55,52 @@ async function run() {
       const result = await bookCollection.findOne(query)
       res.send(result)
     })
+
+    // update book
     app.put('/allBooks/:id', async (req, res) => {
       const id = req.params.id;
-      const query = { _id: new ObjectId(id) }
-      const book = await bookCollection.updateOne(
+      const book = req.body;
+      const filter = { _id: new ObjectId(id) }
+      const options = { upsert: true };
+      const updateBook = {
+        $set: { ...book },
+      };
+      const result = await bookCollection.updateOne(filter, updateBook, options);
+      res.send(result)
+    })
+
+
+
+    // --------------------------
+    // increment 
+    app.put('/allBooks/:id/increment', async (req, res) => {
+      const id = req.params.id;
+      console.log(id);
+      const query = { _id: new ObjectId(id) };
+      const result = await bookCollection.updateOne(
+        query,
+        { $inc: { quantity: 1 } },
+        { new: true }
+      );
+      res.json(result);
+    });
+
+    // decrement
+    app.put('/allBooks/:id/decrement', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await bookCollection.updateOne(
         query,
         { $inc: { quantity: -1 } },
         { new: true }
       );
-      res.json(book);
+      res.json(result);
     });
+    // -----------------
+
+
+
+
 
     app.get("/borrowBooks", async (req, res) => {
       let query = {};
@@ -88,16 +110,23 @@ async function run() {
       const result = await borrowBookCollection.find(query).toArray();
       res.send(result)
     })
+    app.get("/borrowBooks/:id" , async(req ,res)=>{
+      const id = req.params.id;
+      console.log(id);
+    })
 
     app.post('/borrowBooks/:id', async (req, res) => {
       const book = req.body;
       const result = await borrowBookCollection.insertOne(book)
       res.send(result)
     })
-
-
-
-
+    // delete book
+    app.delete('borrowBooks/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) }
+      const result = await borrowBookCollection.deleteOne(query);
+      res.send(result)
+    })
 
 
     // Send a ping to confirm a successful connection
