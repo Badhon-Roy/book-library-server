@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const app = express();
+const jwt = require('jsonwebtoken')
 require('dotenv').config();
 const port = process.env.PORT || 5000;
 
@@ -29,10 +30,25 @@ async function run() {
     const bookCollection = client.db("bookDB").collection("books");
     const borrowBookCollection = client.db("bookDB").collection("borrowBooks");
     await client.connect();
+
+
+    // auth related api
+    app.post('/jwt' , async(req , res)=>{
+      const user = req.body;
+      const token = jwt.sign(user, process.env.ACCESS_API_SECRET , { expiresIn: '1h' })
+      res.send(token)
+    })
+
+
+
+    // book category related api
     app.get('/categories', async (req, res) => {
       const result = await categoryCollection.find().toArray();
       res.send(result)
     })
+
+
+    // all book related api
     app.get('/allBooks', async (req, res) => {
       const result = await bookCollection.find().toArray();
       res.send(result)
@@ -71,11 +87,10 @@ async function run() {
 
 
 
-    // --------------------------
+
     // increment 
     app.put('/allBooks/:id/increment', async (req, res) => {
       const id = req.params.id;
-      console.log(id);
       const query = { _id: new ObjectId(id) };
       const result = await bookCollection.updateOne(
         query,
@@ -96,12 +111,11 @@ async function run() {
       );
       res.json(result);
     });
-    // -----------------
 
 
 
 
-
+    // borrow book related api
     app.get("/borrowBooks", async (req, res) => {
       let query = {};
       if (req?.query?.email) {
@@ -110,9 +124,13 @@ async function run() {
       const result = await borrowBookCollection.find(query).toArray();
       res.send(result)
     })
-    app.get("/borrowBooks/:id" , async(req ,res)=>{
+    
+
+    app.get('/borrowBooks/:id', async (req, res) => {
       const id = req.params.id;
-      console.log(id);
+      const query = { _id: new ObjectId(id) }
+      const result = await borrowBookCollection.findOne(query)
+      res.send(result)
     })
 
     app.post('/borrowBooks/:id', async (req, res) => {
@@ -121,7 +139,7 @@ async function run() {
       res.send(result)
     })
     // delete book
-    app.delete('borrowBooks/:id', async (req, res) => {
+    app.delete('/borrowBooks/:id', async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) }
       const result = await borrowBookCollection.deleteOne(query);
