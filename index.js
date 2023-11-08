@@ -65,14 +65,15 @@ async function run() {
         .cookie('token', token, {
           httpOnly: true,
           secure: true,
-          sameSite: 'none'
+          sameSite: 'none',
+          maxAge : 60 * 60 * 1000
         })
         .send({ success: true })
     })
 
     app.post('/logout', async (req, res) => {
       const user = req.body;
-      res.clearCookie('token', { maxAge: 0 }).send({ success: true })
+      res.clearCookie('token', { maxAge: 0 , secure : true , sameSite : 'none' } ).send({ success: true })
     })
 
 
